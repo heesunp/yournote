@@ -39,6 +39,7 @@
   --warn: #f0c26a; --warn-soft: #2d2410; --danger: #ff9a92; color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   margin: 0; background: var(--bg); color: var(--fg);
   font-family: var(--font-body); font-size: 16px; line-height: 1.65;
@@ -144,7 +145,7 @@ input[type="email"]:focus, input[type="text"]:focus, textarea:focus { border-col
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbwNwo17BEVstIfLeZkrYWqprLIMkBj2-JiXYEZ7vhbsQI7yFmmpklqusQksTd5-KRKwbg/exec";
 const MODE = "live";
 
-const CFG = {"group": "A", "tag": "학생용 사전 신청", "entry": {"q": "본인이나 지인이 악플·허위사실·사칭·딥페이크 피해를 겪은 적 있나요?", "multi": false, "options": [{"id": "self", "label": "본인이 겪었어요"}, {"id": "friend", "label": "지인이 겪었어요"}, {"id": "both", "label": "둘 다 있어요"}, {"id": "interest", "label": "겪은 적은 없지만 관심 있어요"}]}, "landing": {"eyebrow": "피해 기록 정리", "h1": "피해를 발견했을 때, 무엇부터 해야 하는지 한 곳에서", "lede": "악플, 허위사실, 딥페이크 게시물의 증거를 링크만으로 모으고, 삭제 요청과 신고 절차를 순서대로 안내받아요.", "problemsTitle": "이럴 때 헤매요", "problems": ["플랫폼마다 따로 캡처해야 해요", "삭제 요청이나 고소를 어디서 어떻게 하는지 몰라요", "헤매는 사이 게시물이 지워지거나 더 퍼져요"], "how": ["게시물 링크를 붙여 넣어요", "증거를 시각과 함께 정리해 보관해요", "피해 유형에 맞는 대응 순서를 안내받아요"], "sample": {"title": "정리 결과는 이런 모습이에요", "id": "SAMPLE-0001", "rows": [["유형", "허위사실 게시 (커뮤니티)"], ["발견 게시물", "3건"], ["증거 보존", "3건 중 3건 (1건은 원본 삭제 후 보존본)"], ["보존 항목", "캡처 시각, 게시물 주소, 작성자 표시명, 조회·공유 수"], ["다음 순서", "플랫폼 삭제 요청 → 방송통신심의위원회 신고 → 경찰 사이버범죄 신고"]]}}, "pricing": {"h1": "요금과 무료 경로"}, "plans": [{"id": "a990", "name": "간단 정리", "price": "990원", "unit": "1회", "desc": "게시물 1건의 증거 정리본과 신고 경로 안내"}, {"id": "a4900", "name": "꼼꼼 정리", "price": "4,900원", "unit": "1회", "desc": "게시물 최대 10건의 정리본, 유형별 신고 순서와 신고서 초안 양식"}], "fields": [{"id": "email", "type": "email", "label": "이메일", "required": true, "hint": "오픈 소식과 결제 안내를 보낼 주소예요."}, {"id": "reason", "type": "textarea", "label": "신청 이유", "hint": "한두 문장이면 충분해요.", "max": 300}, {"id": "school", "type": "radio", "label": "서울대 재학생인가요?", "options": [["yes", "재학생이에요"], ["no", "아니에요"]]}, {"id": "route", "type": "radio", "label": "어떻게 알게 됐나요?", "options": [["class", "수업·동아리·단톡방"], ["community", "에브리타임"], ["friend", "지인 소개"], ["etc", "기타"]]}, {"id": "acq", "type": "radio", "label": "이 서비스를 만든 사람을 직접 아시나요?", "options": [["yes", "네"], ["no", "아니요"]]}, {"id": "types", "type": "checks", "label": "겪은 피해 유형", "options": [["abuse", "악플"], ["false", "허위사실"], ["impersonation", "사칭"], ["deepfake", "딥페이크"], ["etc", "기타"]]}], "exitReasons": [["price", "가격이 부담돼요"], ["free_enough", "무료 경로로 충분해요"], ["trust", "서비스를 믿기 어려워요"], ["no_need", "지금은 필요 없어요"]]};
+const CFG = {"group": "A", "tag": "학생용 사전 신청", "entry": {"q": "본인이나 지인이 악플·허위사실·사칭·딥페이크 피해를 겪은 적 있나요?", "multi": false, "options": [{"id": "self", "label": "본인이 겪었어요"}, {"id": "friend", "label": "지인이 겪었어요"}, {"id": "both", "label": "둘 다 있어요"}, {"id": "interest", "label": "겪은 적은 없지만 관심 있어요"}]}, "landing": {"eyebrow": "피해 기록 정리", "h1": "피해를 발견했을 때, 무엇부터 해야 하는지 한 곳에서", "lede": "악플, 허위사실, 딥페이크 게시물의 증거를 링크만으로 모으고, 삭제 요청과 신고 절차를 순서대로 안내받아요.", "problemsTitle": "이럴 때 헤매요", "problems": ["플랫폼마다 따로 캡처해야 해요", "삭제 요청이나 고소를 어디서 어떻게 하는지 몰라요", "헤매는 사이 게시물이 지워지거나 더 퍼져요"], "how": ["게시물 링크를 붙여 넣어요", "증거를 시각과 함께 정리해 보관해요", "피해 유형에 맞는 대응 순서를 안내받아요"], "sample": {"title": "정리 결과는 이런 모습이에요", "id": "SAMPLE-0001", "rows": [["유형", "허위사실 게시 (커뮤니티)"], ["발견 게시물", "3건"], ["증거 보존", "3건 중 3건 (1건은 원본 삭제 후 보존본)"], ["보존 항목", "캡처 시각, 게시물 주소, 작성자 표시명, 조회·공유 수"], ["다음 순서", "플랫폼 삭제 요청 → 방송통신심의위원회 신고 → 경찰 사이버범죄 신고"]]}}, "pricing": {"h1": "요금과 무료 경로"}, "plans": [{"id": "a990", "name": "간단 정리", "price": "990원", "unit": "1회", "desc": "게시물 1건의 증거 정리본과 신고 경로 안내"}, {"id": "a4900", "name": "꼼꼼 정리", "price": "4,900원", "unit": "1회", "desc": "게시물 최대 10건의 정리본, 유형별 신고 순서와 신고서 초안 양식"}], "fields": [{"id": "email", "type": "email", "label": "이메일", "required": true, "hint": "오픈 소식과 결제 안내를 보낼 주소예요."}, {"id": "reason", "type": "radio_other", "label": "신청 이유", "options": ["피해를 겪어서 대응 방법이 필요해요", "지인을 돕고 싶어요", "나중을 대비하고 싶어요", "서비스가 어떤지 궁금해요"], "max": 200}, {"id": "school", "type": "radio", "label": "서울대 재학생인가요?", "options": [["yes", "재학생이에요"], ["no", "아니에요"]]}, {"id": "route", "type": "radio", "label": "어떻게 알게 됐나요?", "options": [["class", "수업·동아리·단톡방"], ["community", "에브리타임"], ["friend", "지인 소개"], ["etc", "기타"]]}, {"id": "types", "type": "checks", "label": "겪은 피해 유형", "options": [["abuse", "악플"], ["false", "허위사실"], ["impersonation", "사칭"], ["deepfake", "딥페이크"], ["etc", "기타"]]}], "exitReasons": [["price", "가격이 부담돼요"], ["free_enough", "무료 경로로 충분해요"], ["trust", "서비스를 믿기 어려워요"], ["no_need", "지금은 필요 없어요"]]};
 const FREE = [
   { name: "디지털성범죄피해자지원센터", note: "딥페이크·불법촬영물 삭제 지원과 상담", url: "https://d4u.stop.or.kr" },
   { name: "방송통신심의위원회", note: "불법·유해 정보 심의 신고", url: "https://www.kocsc.or.kr" },
@@ -251,6 +252,12 @@ function renderPricing() {
 function fieldHtml(f) {
   const tagr = f.required ? '<span class="req">필수</span>' : '<span class="opt">선택</span>';
   const hint = f.hint ? '<span class="hint">' + esc(f.hint) + '</span>' : "";
+  if (f.type === "radio_other") {
+    return '<fieldset class="field" id="fld-' + f.id + '"><legend class="flabel">' + esc(f.label) + tagr + '</legend>' + hint +
+      '<div class="choices">' + f.options.map((o, i) => '<label class="choice"><input type="radio" name="' + f.id + '" id="f-' + f.id + '-o' + i + '" value="' + esc(o) + '"><span>' + esc(o) + '</span></label>').join("") +
+      '<label class="choice"><input type="radio" name="' + f.id + '" id="f-' + f.id + '-other" value="__other__"><span>직접 입력</span></label></div>' +
+      '<div id="other-' + f.id + '" hidden><textarea id="f-' + f.id + '-text" maxlength="' + (f.max || 200) + '" rows="3" placeholder="직접 적어 주세요"></textarea></div></fieldset>';
+  }
   if (f.type === "radio" || f.type === "checks") {
     const kind = f.type === "radio" ? "radio" : "checkbox";
     return '<fieldset class="field" id="fld-' + f.id + '"><legend class="flabel">' + esc(f.label) + tagr + '</legend>' + hint +
@@ -264,8 +271,15 @@ function fieldHtml(f) {
 function collect() {
   const data = {};
   CFG.fields.forEach((f) => {
-    if (f.type === "radio") { const c = document.querySelector('input[name="' + f.id + '"]:checked'); data[f.id] = c ? c.value : ""; }
-    else if (f.type === "checks") { data[f.id] = [...document.querySelectorAll('input[name="' + f.id + '"]:checked')].map((x) => x.value).join(","); }
+    const form = $("signup-form");
+    if (f.type === "radio") { const c = form.querySelector('input[name="' + f.id + '"]:checked'); data[f.id] = c ? c.value : ""; }
+    else if (f.type === "radio_other") {
+      const c = form.querySelector('input[name="' + f.id + '"]:checked');
+      if (!c) data[f.id] = "";
+      else if (c.value === "__other__") { const t = $("f-" + f.id + "-text").value.trim(); data[f.id] = t ? "직접입력: " + t : "직접입력"; }
+      else data[f.id] = c.value;
+    }
+    else if (f.type === "checks") { data[f.id] = [...form.querySelectorAll('input[name="' + f.id + '"]:checked')].map((x) => x.value).join(","); }
     else data[f.id] = $("f-" + f.id).value.trim();
   });
   return data;
@@ -283,6 +297,9 @@ function renderForm() {
     '<p class="err" id="form-err" role="alert"></p>' +
     '<div class="actions"><button class="btn" id="submit-btn" type="submit"' + (canSend ? "" : " disabled") + '>사전 신청하기</button></div></form>';
   bindNav(root);
+  CFG.fields.filter((f) => f.type === "radio_other").forEach((f) => {
+    $("signup-form").querySelectorAll('input[name="' + f.id + '"]').forEach((r) => r.addEventListener("change", () => { $("other-" + f.id).hidden = !$("f-" + f.id + "-other").checked; }));
+  });
   $("signup-form").addEventListener("submit", onSubmit);
 }
 async function onSubmit(ev) {
@@ -309,7 +326,7 @@ function renderExit() {
     '<p class="lede">지금은 무료 경로로 충분하다고 판단하셨다면 그것도 좋은 답이에요. 아래에서 다시 확인할 수 있어요.</p>' +
     '<div class="card free"><div>' + freeList() + '</div></div>' +
     '<form class="form" id="exit-form" novalidate>' +
-    fieldHtml({ id: "reason", type: "radio", label: "신청하지 않은 이유가 있다면 골라 주세요", options: CFG.exitReasons }) +
+    fieldHtml({ id: "exitwhy", type: "radio", label: "신청하지 않은 이유가 있다면 골라 주세요", options: CFG.exitReasons }) +
     fieldHtml({ id: "text", type: "textarea", label: "더 하고 싶은 말", max: 200 }) +
     '<div class="hp" aria-hidden="true"><label>웹사이트<input type="text" id="f-website-x" tabindex="-1" autocomplete="off"></label></div>' +
     '<div class="actions"><button class="btn ghost" id="exit-send" type="submit"' + ((MODE === "preview" || ENDPOINT) ? "" : " disabled") + '>의견 보내기</button></div>' +
@@ -317,7 +334,7 @@ function renderExit() {
   bindNav(root);
   $("exit-form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    const c = document.querySelector('#exit-form input[name="reason"]:checked'), t = $("f-text").value.trim();
+    const c = document.querySelector('#exit-form input[name="exitwhy"]:checked'), t = $("f-text").value.trim();
     if (!c && !t) { $("exit-err").textContent = "이유를 고르거나 한 줄 적어 주세요."; return; }
     if ($("f-website-x").value) return;
     $("exit-err").textContent = "";
