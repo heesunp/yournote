@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<style>:root{color-scheme:light}</style>
+<title>지킴노트 크리에이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: one narrow column that reads like a case file; each step is its own screen, evidence-style mono labels carry the data */
+:root {
+  --bg: #f2f4f5;
+  --surface: #ffffff;
+  --fg: #13222a;
+  --muted: #55656e;
+  --line: #d3dce0;
+  --accent: #3a52c4;
+  --accent-fg: #ffffff;
+  --accent-soft: #e4e9fb;
+  --warn: #7a4e00;
+  --warn-soft: #fbf0d9;
+  --danger: #b3261e;
+  --font-body: "IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e171c; --surface: #16232a; --fg: #e6eef1; --muted: #9db0b8; --line: #2a3b44;
+    --accent: #9db1ff; --accent-fg: #0b1417; --accent-soft: #1d2547;
+    --warn: #f0c26a; --warn-soft: #2d2410; --danger: #ff9a92; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e171c; --surface: #16232a; --fg: #e6eef1; --muted: #9db0b8; --line: #2a3b44;
+  --accent: #9db1ff; --accent-fg: #0b1417; --accent-soft: #1d2547;
+  --warn: #f0c26a; --warn-soft: #2d2410; --danger: #ff9a92; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+  padding-inline: 16px; padding-block: 0 56px;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.top { max-width: 640px; margin: 0 auto; padding-block: 18px 6px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.brand { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+.tag { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+main { max-width: 640px; margin: 0 auto; }
+.screen { display: flex; flex-direction: column; gap: 22px; padding-block: 18px; }
+h1, h2 { text-wrap: balance; letter-spacing: -0.02em; line-height: 1.3; margin: 0; }
+h1 { font-size: clamp(26px, 6.4vw, 34px); font-weight: 700; }
+h1.sm { font-size: clamp(24px, 5.6vw, 30px); }
+h2 { font-size: 19px; font-weight: 700; }
+h1:focus, h2:focus, legend:focus { outline: none; }
+p { margin: 0; }
+.lede { color: var(--muted); font-size: 16.5px; max-width: 34em; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.back { align-self: flex-start; background: none; border: 0; color: var(--muted); font: inherit; font-size: 14px; padding: 8px 0; cursor: pointer; min-height: 44px; }
+.back:hover { color: var(--fg); }
+button, .btn, input, textarea { font: inherit; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); font-weight: 700; cursor: pointer; text-decoration: none; text-align: center; }
+.btn:hover { filter: brightness(1.06); }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; filter: none; }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); font-weight: 500; }
+.btn.ghost:hover { border-color: var(--fg); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.choices { display: flex; flex-direction: column; gap: 10px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.choice { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; text-align: left; color: var(--fg); width: 100%; }
+.choice:hover { border-color: var(--accent); }
+.choice input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 0; }
+.choice:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.legend { font-weight: 700; font-size: 19px; line-height: 1.4; margin-bottom: 14px; padding: 0; text-wrap: balance; }
+.hint { font-size: 14px; color: var(--muted); }
+.rule { border: 0; border-top: 1px solid var(--line); margin: 0; }
+ul.plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+ul.plain li { padding-left: 18px; position: relative; }
+ul.plain li::before { content: ""; position: absolute; left: 0; top: 0.72em; width: 8px; height: 2px; background: var(--accent); }
+ol.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; counter-reset: st; }
+ol.steps li { counter-increment: st; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+ol.steps li::before { content: counter(st); font-family: var(--font-mono); font-weight: 500; font-size: 13px; width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid var(--accent); color: var(--accent); border-radius: 50%; }
+.sample { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.sample-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; padding: 10px 16px; background: var(--accent-soft); border-bottom: 1px solid var(--line); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em; }
+.sample-head b { font-weight: 500; color: var(--accent); }
+.sample dl { margin: 0; padding: 4px 16px 8px; }
+.sample .row { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.sample .row:last-child { border-bottom: 0; }
+.sample dt { font-family: var(--font-mono); font-size: 12px; color: var(--muted); padding-top: 3px; letter-spacing: 0.02em; }
+.sample dd { margin: 0; font-size: 15px; min-width: 0; }
+.fine { font-size: 13px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.free a { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--fg); text-decoration: none; }
+.free a:last-child { border-bottom: 0; }
+.free a:hover strong { text-decoration: underline; }
+.free small { display: block; color: var(--muted); font-size: 13.5px; }
+.free .plain-row { padding: 10px 0; }
+.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.plan { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; color: var(--fg); min-width: 0; }
+.plan:hover { border-color: var(--accent); }
+.plan .nm { font-weight: 700; }
+.plan .pr { font-family: var(--font-mono); font-size: 26px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.plan .un { font-size: 13px; color: var(--muted); }
+.plan .ds { font-size: 14.5px; color: var(--muted); }
+.plan .go { margin-top: 8px; color: var(--accent); font-weight: 700; font-size: 15px; }
+.note { padding: 12px 14px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 14px; }
+.summary { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.summary .pr { font-family: var(--font-mono); font-size: 22px; font-variant-numeric: tabular-nums; }
+.form { display: flex; flex-direction: column; gap: 22px; }
+.field { display: flex; flex-direction: column; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.flabel { font-weight: 700; font-size: 15.5px; padding: 0; }
+.req, .opt { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; margin-left: 6px; font-weight: 500; }
+.req { color: var(--accent); }
+.opt { color: var(--muted); }
+.field .choices { gap: 8px; }
+.field .choice { min-height: 46px; }
+input[type="email"], input[type="text"], textarea { width: 100%; min-height: 48px; padding: 11px 14px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; }
+textarea { min-height: 96px; resize: vertical; }
+input[type="email"]:focus, input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+.err { color: var(--danger); font-size: 14px; min-height: 1.2em; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.thanks { padding: 14px 16px; border-radius: 6px; background: var(--accent-soft); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 420px) { .sample .row { grid-template-columns: 1fr; gap: 2px; } .actions .btn { width: 100%; } }
+@media (prefers-reduced-motion: no-preference) { .screen:not([hidden]) { animation: rise .22s ease-out; } @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } } }
+</style>
+
+</head>
+<body>
+<header class="top"><span class="brand">지킴노트</span><span class="tag" id="tag"></span></header>
+<main id="main">
+  <div id="banner" class="note" hidden style="margin-top:12px"></div>
+  <section class="screen" id="s-entry" hidden></section>
+  <section class="screen" id="s-landing" hidden></section>
+  <section class="screen" id="s-pricing" hidden></section>
+  <section class="screen" id="s-form" hidden></section>
+  <section class="screen" id="s-exit" hidden></section>
+  <section class="screen" id="s-done" hidden></section>
+</main>
+
+<script>
+/* 운영자 설정: 배포 전에 Apps Script 웹 앱 주소를 넣으세요. */
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbwNwo17BEVstIfLeZkrYWqprLIMkBj2-JiXYEZ7vhbsQI7yFmmpklqusQksTd5-KRKwbg/exec";
+const MODE = "live";
+
+const CFG = {"group": "B", "tag": "크리에이터용 사전 신청", "entry": {"q": "운영 중인 플랫폼을 모두 골라 주세요", "multi": true, "options": [{"id": "instagram", "label": "인스타그램"}, {"id": "youtube", "label": "유튜브"}, {"id": "tiktok", "label": "틱톡"}, {"id": "blog_etc", "label": "블로그·기타"}, {"id": "none", "label": "아직 운영하지 않아요", "exclusive": true}]}, "landing": {"eyebrow": "채널 피해 관리", "h1": "반복되는 악플·사칭, 캡처하다 지치지 않게", "lede": "악플, 사칭 계정, 허위사실을 한곳에 기록하고, 플랫폼별 신고 절차를 매번 처음부터 찾지 않아도 돼요.", "problemsTitle": "채널을 운영하면 이런 일이 반복돼요", "problems": ["사칭 계정이 협찬 제안과 구독자에게 먼저 닿아요", "같은 작성자가 반복해도 매번 처음부터 캡처해요", "플랫폼마다 신고 창구와 절차가 달라요"], "how": ["채널을 등록해요", "반복되는 피해 기록을 채널별로 쌓아요", "플랫폼별 대응 경로를 안내받아요"], "sample": {"title": "월간 정리는 이런 모습이에요", "id": "SAMPLE-CH · 2026년 9월", "rows": [["감지", "12건 (악플 7 · 사칭 계정 3 · 허위사실 1 · 딥페이크 1)"], ["반복 작성자", "2명"], ["처리 상태", "신고 접수 8건 · 삭제 확인 5건 · 진행 중 3건"], ["보존 항목", "캡처 시각, 게시물 주소, 작성자 표시명, 노출 수"], ["다음 순서", "사칭 계정 신고 → 반복 작성자 기록 정리 → 필요 시 경찰 사이버범죄 신고"]]}}, "pricing": {"h1": "요금과 무료 경로"}, "plans": [{"id": "b9900", "name": "채널 1개", "price": "9,900원", "unit": "월 구독", "desc": "채널 1개의 피해 기록 누적과 월간 정리"}, {"id": "b19900", "name": "채널 여러 개", "price": "19,900원", "unit": "월 구독", "desc": "채널 최대 3개, 사칭 계정 기록 포함"}], "fields": [{"id": "email", "type": "email", "label": "이메일", "required": true, "hint": "오픈 소식과 결제 안내를 보낼 주소예요."}, {"id": "channel", "type": "text", "label": "채널 주소 (첫 번째 채널)", "hint": "정리 샘플을 만드는 목적으로만 쓰고, 실험이 끝나면 파기해요.", "max": 120}, {"id": "followers", "type": "radio", "label": "구독자 규모 (가장 큰 채널 기준)", "options": [["lt1k", "1천 미만"], ["1k_10k", "1천~1만"], ["10k_100k", "1만~10만"], ["gt100k", "10만 초과"]]}, {"id": "exp", "type": "radio", "label": "악플·사칭·허위사실·딥페이크 피해 경험", "options": [["yes", "겪은 적 있어요"], ["no", "겪은 적은 없지만 관심 있어요"]]}, {"id": "reason", "type": "textarea", "label": "신청 이유", "hint": "한두 문장이면 충분해요.", "max": 300}, {"id": "route", "type": "radio", "label": "어떻게 알게 됐나요?", "options": [["dm", "DM·메시지"], ["community", "커뮤니티"], ["friend", "지인 소개"], ["etc", "기타"]]}, {"id": "acq", "type": "radio", "label": "이 서비스를 만든 사람을 직접 아시나요?", "options": [["yes", "네"], ["no", "아니요"]]}, {"id": "interview", "type": "checks", "label": "인터뷰", "options": [["ok", "10분 인터뷰에 응할 수 있어요"]]}], "exitReasons": [["price", "가격이 부담돼요"], ["free_enough", "무료 경로로 충분해요"], ["rare", "피해가 드물어요"], ["trust", "도구를 믿기 어려워요"]]};
+const FREE = [
+  { name: "디지털성범죄피해자지원센터", note: "딥페이크·불법촬영물 삭제 지원과 상담", url: "https://d4u.stop.or.kr" },
+  { name: "방송통신심의위원회", note: "불법·유해 정보 심의 신고", url: "https://www.kocsc.or.kr" },
+  { name: "경찰청 사이버범죄 신고시스템", note: "사이버범죄 온라인 신고", url: "https://ecrm.police.go.kr" }
+];
+const state = { entry: [], plan: null };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const NAMES = ["entry", "landing", "pricing", "form", "exit", "done"];
+const EVT = { entry: "entry_view", landing: "landing_view", pricing: "pricing_view", form: "form_view", exit: "exit_view" };
+const LIVE = MODE === "live" && !!ENDPOINT;
+
+/* 방문자 식별: 브라우저에 저장된 임의 값. 저장이 막히면 이번 방문에만 쓴다. */
+function makeSid() { try { return (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now().toString(36)); } catch (e) { return String(Math.random()).slice(2); } }
+let SID = "";
+try { SID = localStorage.getItem("jn_sid") || ""; if (!SID) { SID = makeSid(); localStorage.setItem("jn_sid", SID); } } catch (e) { SID = SID || makeSid(); }
+let SRC = "";
+try { SRC = (new URLSearchParams(location.search).get("src") || "").slice(0, 40); } catch (e) {}
+
+function send(payload) {
+  if (!LIVE) return Promise.resolve(false);
+  const body = JSON.stringify(Object.assign({ v: 1, ts: new Date().toISOString(), group: CFG.group, sid: SID, src: SRC }, payload));
+  return fetch(ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body, keepalive: true }).then(() => true);
+}
+function track(type) {
+  send({ kind: "event", type: type, entry: state.entry.join(","), plan: state.plan ? state.plan.id : "" }).catch(() => {});
+}
+
+function show(name) {
+  NAMES.forEach((n) => { $("s-" + n).hidden = n !== name; });
+  const h = document.querySelector("#s-" + name + " h1, #s-" + name + " h2, #s-" + name + " legend");
+  if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+  window.scrollTo(0, 0);
+  if (EVT[name]) track(EVT[name]);
+}
+function backBtn(to) { return '<button class="back" type="button" data-go="' + to + '">← 이전</button>'; }
+function bindNav(root) { root.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => show(b.dataset.go))); }
+function freeList() {
+  return FREE.map((f) => '<a href="' + f.url + '" target="_blank" rel="noopener"><strong>' + esc(f.name) + '</strong><small>' + esc(f.note) + '</small></a>').join("") +
+    '<div class="plain-row"><strong>각 플랫폼의 자체 신고 기능</strong><small class="hint" style="display:block">게시물·계정 메뉴의 신고 버튼</small></div>';
+}
+
+function renderBanner() {
+  const b = $("banner");
+  if (MODE === "preview") { b.hidden = false; b.textContent = "미리보기 화면입니다. 여기서 제출한 내용은 저장되지 않아요."; }
+  else if (!ENDPOINT) { b.hidden = false; b.textContent = "운영자 안내: 저장 주소(ENDPOINT)가 아직 연결되지 않아 신청을 받을 수 없어요."; }
+}
+
+function renderEntry() {
+  const e = CFG.entry, root = $("s-entry");
+  if (e.multi) {
+    root.innerHTML = '<div><p class="eyebrow">시작 전 한 가지</p></div>' +
+      '<fieldset class="choices" id="entry-set"><legend class="legend">' + esc(e.q) + '</legend>' +
+      e.options.map((o) => '<label class="choice"><input type="checkbox" id="opt-' + o.id + '" value="' + o.id + '"' + (o.exclusive ? ' data-ex="1"' : '') + '><span>' + esc(o.label) + '</span></label>').join("") +
+      '</fieldset><p class="hint">여러 개를 고를 수 있어요.</p>' +
+      '<div class="actions"><button class="btn" id="entry-next" type="button" disabled>다음</button></div>';
+    const boxes = root.querySelectorAll("input[type=checkbox]"), next = $("entry-next");
+    boxes.forEach((b) => b.addEventListener("change", () => {
+      if (b.checked) boxes.forEach((o) => { if (o !== b && (b.dataset.ex || o.dataset.ex)) o.checked = false; });
+      next.disabled = ![...boxes].some((o) => o.checked);
+    }));
+    next.addEventListener("click", () => { state.entry = [...boxes].filter((o) => o.checked).map((o) => o.value); track("entry"); show("landing"); });
+  } else {
+    root.innerHTML = '<div><p class="eyebrow">시작 전 한 가지</p></div>' +
+      '<fieldset class="choices"><legend class="legend">' + esc(e.q) + '</legend>' +
+      e.options.map((o) => '<button type="button" class="choice" id="opt-' + o.id + '" data-v="' + o.id + '"><span>' + esc(o.label) + '</span></button>').join("") +
+      '</fieldset><p class="hint">한 번 눌러 답하면 바로 다음으로 넘어가요.</p>';
+    root.querySelectorAll("[data-v]").forEach((b) => b.addEventListener("click", () => { state.entry = [b.dataset.v]; track("entry"); show("landing"); }));
+  }
+}
+
+function renderLanding() {
+  const c = CFG.landing;
+  $("s-landing").innerHTML = backBtn("entry") +
+    '<div style="display:flex;flex-direction:column;gap:14px"><p class="eyebrow">' + esc(c.eyebrow) + '</p><h1>' + esc(c.h1) + '</h1><p class="lede">' + esc(c.lede) + '</p></div>' +
+    '<div style="display:flex;flex-direction:column;gap:12px"><h2>' + esc(c.problemsTitle) + '</h2><ul class="plain">' + c.problems.map((p) => '<li>' + esc(p) + '</li>').join("") + '</ul></div>' +
+    '<div style="display:flex;flex-direction:column;gap:12px"><h2>이렇게 정리해요</h2><ol class="steps">' + c.how.map((p) => '<li><span>' + esc(p) + '</span></li>').join("") + '</ol></div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px"><h2>' + esc(c.sample.title) + '</h2>' +
+    '<div class="sample"><div class="sample-head"><b>' + esc(c.sample.id) + '</b><span>가상 사례 · 실제 인물·계정과 무관</span></div><dl>' +
+    c.sample.rows.map((r) => '<div class="row"><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>').join("") + '</dl></div></div>' +
+    '<div class="actions"><button class="btn" id="to-pricing" type="button">요금 보기</button></div>' +
+    '<p class="fine">지킴노트는 사전 신청을 받고 있어요. 지금은 결제하지 않습니다.</p>';
+  bindNav($("s-landing"));
+  $("to-pricing").addEventListener("click", () => show("pricing"));
+}
+
+function renderPricing() {
+  const root = $("s-pricing");
+  root.innerHTML = backBtn("landing") +
+    '<h1 class="sm">' + esc(CFG.pricing.h1) + '</h1>' +
+    '<div class="card free"><h2>먼저, 무료로 쓸 수 있는 경로</h2><p class="hint">지킴노트 없이도 아래 경로에서 신고와 상담을 받을 수 있어요.</p><div>' + freeList() + '</div></div>' +
+    '<h2>지킴노트 사전 신청 플랜</h2>' +
+    '<div class="plans">' + CFG.plans.map((p) => '<button type="button" class="plan" id="plan-' + p.id + '" data-plan="' + p.id + '"><span class="nm">' + esc(p.name) + '</span><span class="pr">' + esc(p.price) + '</span><span class="un">' + esc(p.unit) + '</span><span class="ds">' + esc(p.desc) + '</span><span class="go">이 플랜으로 사전 신청 →</span></button>').join("") + '</div>' +
+    '<p class="fine">지금은 결제하지 않고, 서비스가 열리면 결제 방법을 따로 안내해요.</p>' +
+    '<div class="actions"><button class="btn ghost" id="to-exit" type="button">이번에는 무료 경로만 볼게요</button></div>';
+  bindNav(root);
+  root.querySelectorAll("[data-plan]").forEach((b) => b.addEventListener("click", () => {
+    state.plan = CFG.plans.find((p) => p.id === b.dataset.plan);
+    track("plan_click"); renderForm(); show("form");
+  }));
+  $("to-exit").addEventListener("click", () => { renderExit(); show("exit"); });
+}
+
+function fieldHtml(f) {
+  const tagr = f.required ? '<span class="req">필수</span>' : '<span class="opt">선택</span>';
+  const hint = f.hint ? '<span class="hint">' + esc(f.hint) + '</span>' : "";
+  if (f.type === "radio" || f.type === "checks") {
+    const kind = f.type === "radio" ? "radio" : "checkbox";
+    return '<fieldset class="field" id="fld-' + f.id + '"><legend class="flabel">' + esc(f.label) + tagr + '</legend>' + hint +
+      '<div class="choices">' + f.options.map((o) => '<label class="choice"><input type="' + kind + '" name="' + f.id + '" id="f-' + f.id + '-' + o[0] + '" value="' + o[0] + '"><span>' + esc(o[1]) + '</span></label>').join("") + '</div></fieldset>';
+  }
+  const control = f.type === "textarea"
+    ? '<textarea id="f-' + f.id + '" maxlength="' + (f.max || 300) + '" rows="3"></textarea>'
+    : '<input id="f-' + f.id + '" type="' + (f.type === "email" ? "email" : "text") + '" maxlength="' + (f.max || 120) + '" autocomplete="' + (f.type === "email" ? "email" : "off") + '">';
+  return '<div class="field"><label class="flabel" for="f-' + f.id + '">' + esc(f.label) + tagr + '</label>' + hint + control + '</div>';
+}
+function collect() {
+  const data = {};
+  CFG.fields.forEach((f) => {
+    if (f.type === "radio") { const c = document.querySelector('input[name="' + f.id + '"]:checked'); data[f.id] = c ? c.value : ""; }
+    else if (f.type === "checks") { data[f.id] = [...document.querySelectorAll('input[name="' + f.id + '"]:checked')].map((x) => x.value).join(","); }
+    else data[f.id] = $("f-" + f.id).value.trim();
+  });
+  return data;
+}
+function renderForm() {
+  const root = $("s-form"), p = state.plan;
+  const canSend = MODE === "preview" || !!ENDPOINT;
+  root.innerHTML = backBtn("pricing") +
+    '<h1 class="sm">사전 신청서</h1>' +
+    '<div class="card"><div class="summary"><div><div class="hint">선택한 플랜</div><strong>' + esc(p.name) + '</strong></div><div class="pr">' + esc(p.price) + ' <span class="hint">' + esc(p.unit) + '</span></div></div></div>' +
+    '<form class="form" id="signup-form" novalidate>' + CFG.fields.map(fieldHtml).join("") +
+    '<div class="hp" aria-hidden="true"><label>웹사이트<input type="text" id="f-website" tabindex="-1" autocomplete="off"></label></div>' +
+    '<div class="field"><label class="choice"><input type="checkbox" id="f-consent"><span>사전 신청 확인 목적으로만 입력한 정보를 쓰고, 확인이 끝나면 파기하는 것에 동의해요.</span></label></div>' +
+    '<p class="fine">결제 정보는 받지 않아요.</p>' +
+    '<p class="err" id="form-err" role="alert"></p>' +
+    '<div class="actions"><button class="btn" id="submit-btn" type="submit"' + (canSend ? "" : " disabled") + '>사전 신청하기</button></div></form>';
+  bindNav(root);
+  $("signup-form").addEventListener("submit", onSubmit);
+}
+async function onSubmit(ev) {
+  ev.preventDefault();
+  const err = $("form-err"), btn = $("submit-btn"), data = collect();
+  err.textContent = "";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) { err.textContent = "이메일 주소를 확인해 주세요."; $("f-email").focus(); return; }
+  if (!$("f-consent").checked) { err.textContent = "정보 사용에 동의해야 신청할 수 있어요."; $("f-consent").focus(); return; }
+  if ($("f-website").value) { renderDone(); show("done"); return; }
+  btn.disabled = true; btn.textContent = "보내는 중…";
+  try {
+    await send(Object.assign({ kind: "signup", type: "signup", entry: state.entry.join(","), plan: state.plan.id, price: state.plan.price }, data));
+    renderDone(); show("done");
+  } catch (e) {
+    err.textContent = "전송에 실패했어요. 연결을 확인하고 다시 눌러 주세요.";
+    btn.disabled = false; btn.textContent = "사전 신청하기";
+  }
+}
+
+function renderExit() {
+  const root = $("s-exit");
+  root.innerHTML = backBtn("pricing") +
+    '<h1 class="sm">알려 주셔서 고마워요</h1>' +
+    '<p class="lede">지금은 무료 경로로 충분하다고 판단하셨다면 그것도 좋은 답이에요. 아래에서 다시 확인할 수 있어요.</p>' +
+    '<div class="card free"><div>' + freeList() + '</div></div>' +
+    '<form class="form" id="exit-form" novalidate>' +
+    fieldHtml({ id: "reason", type: "radio", label: "신청하지 않은 이유가 있다면 골라 주세요", options: CFG.exitReasons }) +
+    fieldHtml({ id: "text", type: "textarea", label: "더 하고 싶은 말", max: 200 }) +
+    '<div class="hp" aria-hidden="true"><label>웹사이트<input type="text" id="f-website-x" tabindex="-1" autocomplete="off"></label></div>' +
+    '<div class="actions"><button class="btn ghost" id="exit-send" type="submit"' + ((MODE === "preview" || ENDPOINT) ? "" : " disabled") + '>의견 보내기</button></div>' +
+    '<p class="err" id="exit-err" role="alert"></p><div id="exit-thanks"></div></form>';
+  bindNav(root);
+  $("exit-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const c = document.querySelector('#exit-form input[name="reason"]:checked'), t = $("f-text").value.trim();
+    if (!c && !t) { $("exit-err").textContent = "이유를 고르거나 한 줄 적어 주세요."; return; }
+    if ($("f-website-x").value) return;
+    $("exit-err").textContent = "";
+    try {
+      await send({ kind: "exit", type: "exit_reason", entry: state.entry.join(","), reason: c ? c.value : "", text: t });
+      $("exit-send").disabled = true;
+      $("exit-thanks").innerHTML = '<p class="thanks">의견을 받았어요. 고맙습니다.</p>';
+    } catch (e) { $("exit-err").textContent = "전송에 실패했어요. 다시 눌러 주세요."; }
+  });
+}
+
+function renderDone() {
+  $("s-done").innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:14px"><p class="eyebrow">신청이 접수됐어요</p><h1 class="sm">이 페이지는 수요 확인 실험이었어요</h1></div>' +
+    '<p class="lede">지킴노트는 아직 만들어지지 않았고, 결제는 어디에서도 받지 않았어요. 신청해 주신 것만으로도 이 서비스가 필요한지 확인하는 데 큰 도움이 됐어요.</p>' +
+    '<ul class="plain"><li>남겨 주신 정보는 실험 결과를 정리한 뒤 파기해요.</li><li>화면의 사례는 모두 가상이고, 실제 인물·계정·게시물과 관계가 없어요.</li></ul>' +
+    '<div class="card free"><h2>지금 바로 쓸 수 있는 무료 경로</h2><div>' + freeList() + '</div></div>';
+}
+
+$("tag").textContent = CFG.tag;
+renderBanner(); renderEntry(); renderLanding(); renderPricing(); renderExit(); renderDone();
+function route() { show(location.hash === "#done" ? "done" : "entry"); }
+window.addEventListener("hashchange", route);
+route();
+</script>
+
+</body>
+</html>
